@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Class Portal | JSONbin Version</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Toastify for notifications -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        .blob {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            filter: blur(80px);
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0.4;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(20%, 20%); }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .input-glass {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .input-glass:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #3b82f6;
+            outline: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="p-4">
+    <div class="blob"></div>
+    <div class="blob" style="right: 10%; bottom: 10%; background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); animation-delay: -5s;"></div>
+
+    <main class="glass-card w-full max-w-lg rounded-[2.5rem] p-8 md:p-12 relative overflow-hidden">
+        <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-500/10 mb-6 border border-blue-500/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Live Class Portal</h1>
+            <p id="system-status" class="text-slate-400 text-sm mb-8">Checking for updates...</p>
+        </div>
+
+        <div id="display-area" class="space-y-6">
+            <div id="link-status" class="bg-white/5 rounded-3xl p-8 border border-white/5 text-center">
+                <div id="no-link-content" class="py-4">
+                    <p class="text-slate-500 italic mb-2">No Classes Scheduled.</p>
+                    <p class="text-xs text-slate-600 uppercase tracking-widest">Waiting for update...</p>
+                </div>
+
+                <div id="active-link-content" class="hidden">
+                    <span class="inline-block px-3 py-1 bg-green-500/10 text-green-400 text-[10px] font-bold uppercase tracking-wider rounded-full border border-green-500/20 mb-4">Session Active</span>
+                    <h3 class="text-white text-lg font-semibold mb-1">Online Classroom</h3>
+                    <p id="last-updated" class="text-[10px] text-slate-500 mb-6"></p>
+                    <a id="join-now-btn" href="#" target="_blank" class="btn-primary block w-full py-4 rounded-2xl text-white font-bold text-center">
+                        Join via Zoom
+                    </a>
+                </div>
+            </div>
+
+            <button id="disabled-join" class="w-full py-4 bg-slate-800 text-slate-600 font-bold rounded-2xl cursor-not-allowed border border-white/5">
+                Join Button Disabled
+            </button>
+        </div>
+
+        <div class="mt-10 pt-6 border-t border-white/5 text-center">
+            <button onclick="openAdminModal()" class="text-slate-500 hover:text-blue-400 text-xs font-medium uppercase tracking-widest flex items-center justify-center gap-2 mx-auto transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Manage Class Portal
+            </button>
+        </div>
+    </main>
+
+    <!-- Admin Modal -->
+    <div id="admin-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-card w-full max-w-md rounded-[2rem] p-8 border border-white/20">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-white">Admin Controls</h2>
+                <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Admin Password</label>
+                    <input type="password" id="admin-pass" class="input-glass w-full px-4 py-3 rounded-xl text-sm" placeholder="••••••••">
+                </div>
+
+                <div class="pt-4 border-t border-white/5">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Zoom Meeting URL</label>
+                    <input type="url" id="zoom-link-input" class="input-glass w-full px-4 py-3 rounded-xl text-sm mb-4" placeholder="https://zoom.us/j/...">
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="updateClassLink()" class="btn-primary py-3 rounded-xl text-white text-sm font-bold">Update Link</button>
+                        <button onclick="removeClassLink()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 py-3 rounded-xl text-sm font-bold border border-red-500/20 transition-all">Remove Current</button>
+                    </div>
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-600 text-center mt-6 uppercase tracking-widest">Powered by JSONbin.io</p>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        // 1. Your specific Bin ID
+        const BIN_ID = "695166c5d0ea881f404590bc"; 
+        // 2. Your provided Master Key
+        const MASTER_KEY = "$2a$10$5DUBLN1C3earHx9hDBECqe02BXZh050D8WD/Cu2yY/DcfvV.zxPCm"; 
+        const ADMIN_CRED = "admin786";
+
+        const API_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+        // UI Selectors
+        const noLinkView = document.getElementById('no-link-content');
+        const activeView = document.getElementById('active-link-content');
+        const joinBtn = document.getElementById('join-now-btn');
+        const disabledBtn = document.getElementById('disabled-join');
+        const timeLabel = document.getElementById('last-updated');
+        const statusText = document.getElementById('system-status');
+
+        // Fetch Data Function
+        async function fetchData() {
+            if (BIN_ID === "" || BIN_ID === "YOUR_BIN_ID") {
+                statusText.innerText = "Please set your Bin ID in the code";
+                return;
+            }
+            try {
+                const response = await fetch(`${API_URL}/latest`, {
+                    headers: { "X-Master-Key": MASTER_KEY }
+                });
+                
+                if (!response.ok) throw new Error("Bin not found or unauthorized");
+                
+                const result = await response.json();
+                const data = result.record;
+
+                if (data && data.link && data.link !== "") {
+                    noLinkView.classList.add('hidden');
+                    disabledBtn.classList.add('hidden');
+                    activeView.classList.remove('hidden');
+                    joinBtn.href = data.link;
+                    timeLabel.innerText = `Class posted at: ${data.timestamp}`;
+                } else {
+                    noLinkView.classList.remove('hidden');
+                    disabledBtn.classList.remove('hidden');
+                    activeView.classList.add('hidden');
+                }
+                statusText.innerText = "Connected • Live Syncing";
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Database connection error";
+            }
+        }
+
+        // Poll for updates every 10 seconds
+        setInterval(fetchData, 10000);
+        fetchData();
+
+        // Admin: Update Link
+        async function updateClassLink() {
+            const pass = document.getElementById('admin-pass').value;
+            const link = document.getElementById('zoom-link-input').value;
+
+            if (pass !== ADMIN_CRED) return showToast("Invalid Password", "#f43f5e");
+            if (!link.startsWith('https://')) return showToast("Invalid URL (Must use https://)", "#f59e0b");
+
+            try {
+                statusText.innerText = "Uploading to Database...";
+                const response = await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Master-Key": MASTER_KEY
+                    },
+                    body: JSON.stringify({ link: link, timestamp: new Date().toLocaleString() })
+                });
+
+                if (response.ok) {
+                    showToast("Link Published Successfully!", "#10b981");
+                    fetchData();
+                    closeAdminModal();
+                } else {
+                    throw new Error();
+                }
+            } catch (err) {
+                showToast("Update Failed: Check API/Bin ID", "#f43f5e");
+                statusText.innerText = "Error updating bin";
+            }
+        }
+
+        // Admin: Remove Link
+        async function removeClassLink() {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass !== ADMIN_CRED) return showToast("Invalid Password", "#f43f5e");
+
+            try {
+                statusText.innerText = "Clearing Database...";
+                await fetch(API_URL, {
+                    method: 'PUT',
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Master-Key": MASTER_KEY
+                    },
+                    body: JSON.stringify({ link: "", timestamp: "" })
+                });
+                showToast("Link Removed for All Users", "#64748b");
+                fetchData();
+                closeAdminModal();
+            } catch (err) {
+                showToast("Clear Failed", "#f43f5e");
+            }
+        }
+
+        function showToast(msg, color) {
+            if (window.Toastify) {
+                Toastify({
+                    text: msg,
+                    duration: 3000,
+                    style: { background: color, borderRadius: "12px", fontSize: "12px", fontWeight: "bold" }
+                }).showToast();
+            }
+        }
+
+        function openAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('opacity-100'), 10);
+        }
+
+        function closeAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            modal.classList.remove('opacity-100');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('admin-pass').value = '';
+                document.getElementById('zoom-link-input').value = '';
+            }, 300);
+        }
+    </script>
+</body>
+</html>
